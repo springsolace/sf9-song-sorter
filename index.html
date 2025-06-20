@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SF9 Song Sorter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #96d8fb, #b6d3f1, #b6dce5, #e4d3e3, #e9cbe2);
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+      
+    }
+    .song-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .song {
+      cursor: pointer;
+      width: 45%;
+      max-width: 200px;
+      padding: 10px;
+      background: white;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-sizing: border-box;
+
+    /* ✨ Additions for beautification */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+.song:hover {
+      border-color: #333;
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .song img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+    .progress {
+      margin: 20px 0;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: #76c7c0;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    table {
+      width: 80%;
+      margin: 40px auto 0;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #76c7c0;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #5aa9a4;
+    }
+    @media (max-width: 600px) {
+      .song {
+        width: 100%;
+      }
+      .progress {
+        height: 15px;
+      }
+      button {
+        width: 100%;
+        font-size: 18px;
+        padding: 12px;
+      }
+      table th, table td {
+        font-size: 14px;
+        padding: 8px;
+      }
+    }
+
+.banner {
+  padding: 20px 10px;
+  text-align: center;
+  color: white;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+.banner h1 {
+  margin: 0;
+  font-size: 2em;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+  margin-top: 5px;
+}
+
+.song-title {
+  text-align: center;
+  font-weight: bold;
+  margin: 8px 0 0;
+}
+
+.song-image-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.song-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.40);
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+  padding: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 0 0 10px 10px;
+}
+
+.song:hover .song-info {
+  opacity: 1;
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="banner">
+  <h1>The Ultimate SF9 Song Sorter</h1>
+  <h5>This sorter includes: all Korean releases from 15 mini albums, 1 full album, 1 single album, <br/>
+    1 special anniversary single album, 1 Christmas single, and 1 Universe digital single.</h5>
+  <h5>This sorter DOES NOT include: solo releases that were not included in any of the albums above, <br />
+    group and solo OSTs, songs performed on FNC Kingdom, or SoundCloud releases. Those will have a sorter of their own.<br />
+    Maybe. If this doesn't finish me off.</h5>
+  <h5>Please note that this is going to be REALLLLLLLLLLY long.</h5>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText">0%</div>
+    <div class="song-container" id="songContainer"></div>
+    <div id="resultContainer" style="display: none">
+      <h2>Final Ranking</h2>
+      <table id="resultTable">
+        <thead>
+          <tr><th>Rank</th><th>Song Title</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button onclick="restart()">Restart</button>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const songs = [
+      { title: "Fanfare", album: "The 1st Single Album: Feeling Sensation", year: 2016, image: "media/feeling_sensation.png" },
+      { title: "K.O.", album: "The 1st Single Album: Feeling Sensation", year: 2016, image: "media/feeling_sensation.png" },
+      { title: "Together", album: "The 1st Single Album: Feeling Sensation", year: 2016, image: "media/feeling_sensation.png" },
+      { title: "So Beautiful", album: "So Beautiful (Single)", year: 2016, image: "media/so_beautiful.png" },
+      { title: "Tell Me What It Is", album: "The 1st Mini Album: Burning Sensation", year: 2017, image: "media/burning_sensation.png" },
+      { title: "ROAR", album: "The 1st Mini Album: Burning Sensation", year: 2017, image: "media/burning_sensation.png" },
+      { title: "Still My Lady", album: "The 1st Mini Album: Burning Sensation", year: 2017, image: "media/burning_sensation.png" },
+      { title: "Shut Up N' Lemme Go", album: "The 1st Mini Album: Burning Sensation", year: 2017, image: "media/burning_sensation.png" },
+      { title: "4 Step", album: "The 1st Mini Album: Burning Sensation", year: 2017, image: "media/burning_sensation.png" },
+      { title: "Jungle Game", album: "The 1st Mini Album: Burning Sensation", year: 2017, image: "media/burning_sensation.png" },
+      { title: "Intro; 이별 즈음에", album: "The 2nd Mini Album: Breaking Sensation", year: 2017, image: "media/breaking_sensation.png" },
+      { title: "쉽다 (Easy Love)", album: "The 2nd Mini Album: Breaking Sensation", year: 2017, image: "media/breaking_sensation.png" },
+      { title: "Watch Out", album: "The 2nd Mini Album: Breaking Sensation", year: 2017, image: "media/breaking_sensation.png" },
+      { title: "머리카락 보일라 (Hide and Seek)", album: "The 2nd Mini Album: Breaking Sensation", year: 2017, image: "media/breaking_sensation.png" },
+      { title: "이러다가 울겠어 (Fall Down)", album: "The 2nd Mini Album: Breaking Sensation", year: 2017, image: "media/breaking_sensation.png" },
+      { title: "왜 이래 (Why)", album: "The 2nd Mini Album: Breaking Sensation", year: 2017, image: "media/breaking_sensation.png" },
+      { title: "詩; 00:00", album: "The 3rd Mini Album: Knights of the Sun", year: 2017, image: "media/kots.png" },
+      { title: "O Sole Mio", album: "The 3rd Mini Album: Knights of the Sun", year: 2017, image: "media/kots.png" },
+      { title: "나랑 놀자 (Let’s Hang Out)", album: "The 3rd Mini Album: Knights of the Sun", year: 2017, image: "media/kots.png" },
+      { title: "빈칸 (Blank)", album: "The 3rd Mini Album: Knights of the Sun", year: 2017, image: "media/kots.png" },
+      { title: "불호령 (Scold)", album: "The 3rd Mini Album: Knights of the Sun", year: 2017, image: "media/kots.png" },
+      { title: "웬 감성팔이야 (Just On My Way)", album: "The 3rd Mini Album: Knights of the Sun", year: 2017, image: "media/kots.png" },
+      { title: "MAMMA MIA", album: "The 4th Mini Album: MAMMA MIA", year: 2018, image: "media/mamma_mia.png" },
+      { title: "Never Say Goodbye", album: "The 4th Mini Album: MAMMA MIA", year: 2018, image: "media/mamma_mia.png" },
+      { title: "시간을 거꾸로 (Go Back in Time)", album: "The 4th Mini Album: MAMMA MIA", year: 2018, image: "media/mamma_mia.png" },
+      { title: "Be my Baby", album: "The 4th Mini Album: MAMMA MIA", year: 2018, image: "media/mamma_mia.png" },
+      { title: "Midnight Road", album: "The 4th Mini Album: MAMMA MIA", year: 2018, image: "media/mamma_mia.png" },
+      { title: "Dear Fantasy", album: "The 4th Mini Album: MAMMA MIA", year: 2018, image: "media/mamma_mia.png" },
+      { title: "질렀어 (Now or Never)", album: "The 5th Mini Album: SENSUOUS", year: 2018, image: "media/sensuous.png" },
+      { title: "달라 (Different)", album: "The 5th Mini Album: SENSUOUS", year: 2018, image: "media/sensuous.png" },
+      { title: "Unlimited", album: "The 5th Mini Album: SENSUOUS", year: 2018, image: "media/sensuous.png" },
+      { title: "PHOTOGRAPH", album: "The 5th Mini Album: SENSUOUS", year: 2018, image: "media/sensuous.png" },
+      { title: "SHADOW", album: "The 5th Mini Album: SENSUOUS", year: 2018, image: "media/sensuous.png" },
+      { title: "예뻐지지 마 (Enough)", album: "The 6th Mini Album: NARCISSUS", year: 2019, image: "media/narcissus.png" },
+      { title: "화끈하게 (Play Hard)", album: "The 6th Mini Album: NARCISSUS", year: 2019, image: "media/narcissus.png" },
+      { title: "하필 (Heartbeat)", album: "The 6th Mini Album: NARCISSUS", year: 2019, image: "media/narcissus.png" },
+      { title: "Life is So Beautiful", album: "The 6th Mini Album: NARCISSUS", year: 2019, image: "media/narcissus.png" },
+      { title: "Fall In Love", album: "The 6th Mini Album: NARCISSUS", year: 2019, image: "media/narcissus.png" },
+      { title: "무중력 (The Beat Goes On)", album: "The 6th Mini Album: NARCISSUS", year: 2019, image: "media/narcissus.png" },
+      { title: "RPM", album: "The 7th Mini Album: RPM", year: 2019, image: "media/rpm.png" },
+      { title: "돌고 돌아 (Round And Round)", album: "The 7th Mini Album: RPM", year: 2019, image: "media/rpm.png" },
+      { title: "Dreamer", album: "The 7th Mini Album: RPM", year: 2019, image: "media/rpm.png" },
+      { title: "Liar", album: "The 7th Mini Album: RPM", year: 2019, image: "media/rpm.png" },
+      { title: "See U Tomorrow", album: "The 7th Mini Album: RPM", year: 2019, image: "media/rpm.png" },
+      { title: "Echo", album: "The 7th Mini Album: RPM", year: 2019, image: "media/rpm.png" },
+      { title: "Good Guy", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "나만 그래 (Am I The Only One)", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "Shh", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "룰루랄라 (Lullu Lalla)", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "One Love", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "널 꽉 잡은 손만큼 (Like The Hands Held Tight)", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "타 (Fire)", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "더 잔인하게 (Stop It Now)", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "춤을 출 거야 (Dance With Us)", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "Beautiful Light", album: "The 1st Full Album: First Collection", year: 2020, image: "media/first_collection.png" },
+      { title: "여름 향기가 날 춤추게 해 (Summer Breeze)", album: "The 8th Mini Album: 9loryUS", year: 2020, image: "media/9loryUS.png" },
+      { title: "별을 따라 (Into The Night)", album: "The 8th Mini Album: 9loryUS", year: 2020, image: "media/9loryUS.png" },
+      { title: "OK Sign", album: "The 8th Mini Album: 9loryUS", year: 2020, image: "media/9loryUS.png" },
+      { title: "비켜 (All Day All Night)", album: "The 8th Mini Album: 9loryUS", year: 2020, image: "media/9loryUS.png" },
+      { title: "미친 것처럼 (Go High)", album: "The 8th Mini Album: 9loryUS", year: 2020, image: "media/9loryUS.png" },
+      { title: "My Story, My Song", album: "The 8th Mini Album: 9loryUS", year: 2020, image: "media/9loryUS.png" },
+      { title: "손잡아 줄게 (Shine Together)", album: "4th Anniversary Single Album: Special History Book", year: 2020, image: "media/special_history_book.png" },
+      { title: "오래 오래 (Forever)", album: "4th Anniversary Single Album: Special History Book", year: 2020, image: "media/special_history_book.png" },
+      { title: "Love No.5", album: "4th Anniversary Single Album: Special History Book", year: 2020, image: "media/special_history_book.png" },
+      { title: "Tear Drop", album: "The 9th Mini Album: TURN OVER", year: 2021, image: "media/turnover.png" },
+      { title: "Believer", album: "The 9th Mini Album: TURN OVER", year: 2021, image: "media/turnover.png" },
+      { title: "한 번 더 사랑하자 (Love Again)", album: "The 9th Mini Album: TURN OVER", year: 2021, image: "media/turnover.png" },
+      { title: "하자 하자 이별 좀 (Off My Mind)", album: "The 9th Mini Album: TURN OVER", year: 2021, image: "media/turnover.png" },
+      { title: "방방 뛰어 (Fanatic)", album: "The 9th Mini Album: TURN OVER", year: 2021, image: "media/turnover.png" },
+      { title: "Hey Hi Bye", album: "The 9th Mini Album: TURN OVER", year: 2021, image: "media/turnover.png" },
+      { title: "Trauma", album: "The 10th Mini Album: RUMINATION", year: 2021, image: "media/rumination.png" },
+      { title: "Memory", album: "The 10th Mini Album: RUMINATION", year: 2021, image: "media/rumination.png" },
+      { title: "Dreams", album: "The 10th Mini Album: RUMINATION", year: 2021, image: "media/rumination.png" },
+      { title: "Gentleman", album: "The 10th Mini Album: RUMINATION", year: 2021, image: "media/rumination.png" },
+      { title: "잠시 (On And On)", album: "The 10th Mini Album: RUMINATION", year: 2021, image: "media/rumination.png" },
+      { title: "Scenario", album: "The 10th Mini Album: RUMINATION", year: 2021, image: "media/rumination.png" },
+      { title: "오늘이라서 (For Fantasy)", album: "The 10th Mini Album: RUMINATION", year: 2021, image: "media/rumination.png" },
+      { title: "Savior", album: "Savior: Universe Digital Single", year: 2021, image: "media/savior.png" },
+      { title: "SCREAM", album: "The 11th Mini Album: The Wave OF9", year: 2022, image: "media/wave_of9.png" },
+      { title: "OK OK", album: "The 11th Mini Album: The Wave OF9", year: 2022, image: "media/wave_of9.png" },
+      { title: "Summertime Bounce (Don't Kill My Vibe)", album: "The 11th Mini Album: The Wave OF9", year: 2022, image: "media/wave_of9.png" },
+      { title: "Driver", album: "The 11th Mini Album: The Wave OF9", year: 2022, image: "media/wave_of9.png" },
+      { title: "Crazy Crazy Love", album: "The 11th Mini Album: The Wave OF9", year: 2022, image: "media/wave_of9.png" },
+      { title: "Butterfly", album: "The 11th Mini Album: The Wave OF9", year: 2022, image: "media/wave_of9.png" },
+      { title: "Puzzle", album: "The 12th Mini Album: The Piece OF9", year: 2023, image: "media/piece_of9.png" },
+      { title: "Love Colour", album: "The 12th Mini Album: The Piece OF9", year: 2023, image: "media/piece_of9.png" },
+      { title: "New World", album: "The 12th Mini Album: The Piece OF9", year: 2023, image: "media/piece_of9.png" },
+      { title: "Fighter", album: "The 12th Mini Album: The Piece OF9", year: 2023, image: "media/piece_of9.png" },
+      { title: "꽉 (Tight)", album: "The 12th Mini Album: The Piece OF9", year: 2023, image: "media/piece_of9.png" },
+      { title: "Stay With Me", album: "The 12th Mini Album: The Piece OF9", year: 2023, image: "media/piece_of9.png" },
+      { title: "비보라 (BIBORA)", album: "The 13th Mini Album: Sequence", year: 2024, image: "media/sequence.png" },
+      { title: "Midnight Sun", album: "The 13th Mini Album: Sequence", year: 2024, image: "media/sequence.png" },
+      { title: "Domino", album: "The 13th Mini Album: Sequence", year: 2024, image: "media/sequence.png" },
+      { title: "Strings", album: "The 13th Mini Album: Sequence", year: 2024, image: "media/sequence.png" },
+      { title: "Morning Coffee", album: "The 13th Mini Album: Sequence", year: 2024, image: "media/sequence.png" },
+      { title: "Superconductor", album: "The 13th Mini Album: Sequence", year: 2024, image: "media/sequence.png" },
+      { title: "Don't Worry, Be Happy", album: "The 14th Mini Album: FANTASY", year: 2024, image: "media/fantasy.png" },
+      { title: "Cruel Love", album: "The 14th Mini Album: FANTASY", year: 2024, image: "media/fantasy.png" },
+      { title: "그냥 (Just)", album: "The 14th Mini Album: FANTASY", year: 2024, image: "media/fantasy.png" },
+      { title: "My Fantasia", album: "The 14th Mini Album: FANTASY", year: 2024, image: "media/fantasy.png" },
+      { title: "Melodrama", album: "The 14th Mini Album: FANTASY", year: 2024, image: "media/fantasy.png" },
+      { title: "LOVE RACE", album: "The 15th Mini Album: LOVE RACE", year: 2025, image: "media/love_race.png" },
+      { title: "Suited", album: "The 15th Mini Album: LOVE RACE", year: 2025, image: "media/love_race.png" },
+      { title: "Side by Side", album: "The 15th Mini Album: LOVE RACE", year: 2025, image: "media/love_race.png" },
+      { title: "Waruru", album: "The 15th Mini Album: LOVE RACE", year: 2025, image: "media/love_race.png" },
+      { title: "No No No", album: "The 15th Mini Album: LOVE RACE", year: 2025, image: "media/love_race.png" },
+      { title: "Love Puzzle", album: "The 15th Mini Album: LOVE RACE", year: 2025, image: "media/love_race.png" }
+    ];
+
+    let pairs = [], current = 0, scores = {};
+
+    songs.forEach(song => {
+      scores[song.title] = 0;
+    });
+
+    function generatePairs(arr) {
+      const pairs = [];
+      for (let i = 0; i < arr.length; i++) {
+        for (let j = i + 1; j < arr.length; j++) {
+          pairs.push([arr[i], arr[j]]);
+        }
+      }
+      return pairs.sort(() => Math.random() - 0.5);
+    }
+
+    function updateProgress() {
+  const percent = ((current / pairs.length) * 100).toFixed(0);
+  document.getElementById("progressBar").style.width = `${percent}%`;
+  document.getElementById("progressText").textContent = `${percent}%`;
+}
+
+    function showPair() {
+      if (current >= pairs.length) return showResults();
+      const [a, b] = pairs[current];
+      const container = document.getElementById("songContainer");
+      container.innerHTML = "";
+      [a, b].forEach(song => {
+        const div = document.createElement("div");
+        div.className = "song";
+        div.innerHTML = `
+  <div class="song-image-wrapper">
+    <img src="${song.image}" alt="${song.title}" />
+    <div class="song-info">
+      <p><em>${song.album}</em><br>${song.year}</p>
+    </div>
+  </div>
+  <p class="song-title">${song.title}</p>
+`;
+
+        div.onclick = () => vote(song);
+        container.appendChild(div);
+      });
+      updateProgress();
+    }
+
+    function vote(song) {
+      scores[song.title]++;
+      current++;
+      showPair();
+    }
+
+    function showResults() {
+  // Force progress bar to 100%
+  document.getElementById("progressBar").style.width = `100%`;
+  document.getElementById("progressText").textContent = `100%`;
+
+  document.getElementById("songContainer").style.display = "none";
+  document.getElementById("resultContainer").style.display = "block";
+  const resultTable = document.getElementById("resultTable").querySelector("tbody");
+  const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  resultTable.innerHTML = ranked.map((item, index) =>
+    `<tr><td>${index + 1}</td><td>${item[0]}</td></tr>`
+  ).join("");
+}
+
+
+    window.restart = function () {
+      current = 0;
+      scores = {};
+      songs.forEach(song => {
+        scores[song.title] = 0;
+      });
+      pairs = generatePairs(songs);
+      document.getElementById("songContainer").style.display = "flex";
+      document.getElementById("resultContainer").style.display = "none";
+      showPair();
+    };
+
+    pairs = generatePairs(songs);
+    showPair();
+  });
+</script>
+
+</body>
+</html>
